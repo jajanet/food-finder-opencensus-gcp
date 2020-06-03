@@ -1,3 +1,6 @@
+vendor_data.h
+vendor_data.cc
+
 # Prerequisites
 *.d
 
