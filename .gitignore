@@ -1,6 +1,8 @@
 vendor_data.h
 vendor_data.cc
 
+bazel*
+
 # Prerequisites
 *.d
 
