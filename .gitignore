@@ -1,7 +1,8 @@
 vendor_data.h
 vendor_data.cc
-
+prometheus-2.18.1.linux-amd64/
 bazel-*.*
+bazel-*
 
 # Prerequisites
 *.d
