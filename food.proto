@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package food;
+
+service Supplier {
+  rpc GetStores (ItemQuery) returns (stream Store) {}
+}
+
+service Vendor {
+  rpc GetItemInfo (ItemStoreQuery) returns (ItemInfo) {}
+}
+
+// Request containing queried item/ingredient.
+message ItemQuery {
+  string name = 1;
+}
+
+// Message containing stores with the requested item
+message Store {
+  string name = 1;
+}
+
+// Request containing store and item
+message ItemStoreQuery {
+  string name = 1;
+  string store = 2;
+}
+
+
+// Response containing price and inventory for given store and item
+message ItemInfo {
+  double price = 1;
+  uint32 inventory = 2;
+}
+
+
+// package .usr.local.google.home.janetvu.janet-starter-project.files.starter-proj;
