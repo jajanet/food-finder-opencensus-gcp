@@ -1,5 +1,5 @@
-#ifdef EXPORTER
-#define EXPORTER
+//#ifdef EXPORTER
+//#define EXPORTER
 
 #include "exporters.h"
 
@@ -48,4 +48,4 @@ void RegisterExporters() {
   }
 }
 
-#endif // EXPORTER
+//#endif // EXPORTER

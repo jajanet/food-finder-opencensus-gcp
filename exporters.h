@@ -1,6 +1,6 @@
-#ifdef EXPORTER_H
-#define EXPORTER_H
+//#ifdef EXPORTER_H
+//#define EXPORTER_H
 
 void RegisterExporters();
 
-#endif // EXPORTER_H
+//#endif // EXPORTER_H

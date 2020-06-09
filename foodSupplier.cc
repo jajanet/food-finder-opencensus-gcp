@@ -6,20 +6,78 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <cstdlib>
+#include <memory>
+
 #include "foodSupplier.h"
-//#include "doDelay.cc"
+#include "exporters.h"
+#include "food.grpc.pb.h"
+#include "food.pb.h"
+#include <grpcpp/grpcpp.h>
+#include <grpcpp/opencensus.h>
 
-void FoodSupplier (std::string const& ingredient, std::vector<std::string>&suppliers) {
-  std::cout << "Searching for " << ingredient << "...\n";
-  auto vendorInfo = getVendorOfferings();
+#include "absl/strings/escaping.h"
+#include "absl/strings/numbers.h"
+#include "absl/strings/str_cat.h"
+#include "opencensus/exporters/stats/prometheus/prometheus_exporter.h"
+#include "opencensus/stats/stats.h"
+#include "opencensus/tags/context_util.h"
+#include "opencensus/tags/tag_map.h"
+#include "opencensus/trace/context_util.h"
+#include "opencensus/trace/sampler.h"
+#include "opencensus/trace/span.h"
+#include "opencensus/trace/trace_config.h"
+#include "prometheus/exposer.h"
 
-  for (auto &vendorPair : vendorInfo) {
-    // doSyntheticDelay(vendorPair.first + "... ");
-    if (vendorPair.second.find(ingredient) != vendorPair.second.end()) {
-      suppliers.push_back(vendorPair.first);
+class SupplierService final : public food::Supplier::Service {
+  grpc::Status GetStores (grpc::ServerContext *context,
+                    const food::ItemQuery* query,
+                    food::StoreReply* reply) {
+
+    auto vendorInfo = getVendorOfferings();
+
+    for (auto &vendorPair : vendorInfo) {
+      if (vendorPair.second.find(query->item()) != vendorPair.second.end()) {
+        reply->add_stores(vendorPair.first);
+      }
     }
+    std::cout << "Request for " << query->item() << "\n";
+    return grpc::Status::OK;
   }
-  std::cout << "\n";
+};
+
+void foodSupplier(){
+  const std::string port = "127.0.0.1:8888";
+
+  // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
+  grpc::RegisterOpenCensusPlugin();
+
+  // Register the gRPC views (latency, error count, etc).
+  grpc::RegisterOpenCensusViewsForExport();
+
+  RegisterExporters();
+
+  // Keep a shared pointer to the Prometheus exporter.
+  auto exporter =
+      std::make_shared<opencensus::exporters::stats::PrometheusExporter>();
+
+  // Expose a Prometheus endpoint.
+  prometheus::Exposer exposer("127.0.0.1:8080");
+  exposer.RegisterCollectable(exporter);
+
+  grpc::ServerBuilder builder;
+  SupplierService service;
+
+  builder.AddListeningPort(port, grpc::InsecureServerCredentials());
+  builder.RegisterService(&service);
+  std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
+  std::cout << "Server listening on [::]:" << port << "\n";
+  server->Wait();
+
+}
+
+int main(){
+  foodSupplier();
 }
 
 std::map<std::string, std::set<std::string>> vendorOfferings {

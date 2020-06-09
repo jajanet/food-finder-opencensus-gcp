@@ -3,34 +3,34 @@ syntax = "proto3";
 package food;
 
 service Supplier {
-  rpc GetStores (ItemQuery) returns (stream Store) {}
+  rpc GetStores (ItemQuery) returns (StoreReply) {}
 }
 
 service Vendor {
-  rpc GetItemInfo (ItemStoreQuery) returns (ItemInfo) {}
+  rpc GetItemInfo (ItemStoreQuery) returns (ItemInfoReply) {}
 }
 
 // Request containing queried item/ingredient.
 message ItemQuery {
-  string name = 1;
+  string item = 1;
 }
 
 // Message containing stores with the requested item
-message Store {
-  string name = 1;
+message StoreReply {
+  repeated string stores = 1;
 }
 
 // Request containing store and item
 message ItemStoreQuery {
-  string name = 1;
+  string item = 1;
   string store = 2;
 }
 
 
 // Response containing price and inventory for given store and item
-message ItemInfo {
+message ItemInfoReply {
   double price = 1;
-  uint32 inventory = 2;
+  int32 inventory = 2;
 }
 
 

@@ -9,6 +9,6 @@
 std::map<std::string, std::map<std::string, double>> getVendorPrices ();
 std::map<std::string, std::map<std::string, int>> getVendorStock ();
 
-void FoodVendor (std::string const& item, std::vector<std::string> &suppliers); 
+void foodVendor();
 
 #endif // FOODVENDOR_H
