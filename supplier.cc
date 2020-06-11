@@ -9,8 +9,8 @@
 #include <cstdlib>
 #include <memory>
 
-#include "foodSupplier.h"
-#include "exporters.h"
+#include "include/supplier.h"
+#include "include/exporters.h"
 #include "food.grpc.pb.h"
 #include "food.pb.h"
 #include <grpcpp/grpcpp.h>

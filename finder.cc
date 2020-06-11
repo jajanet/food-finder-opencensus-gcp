@@ -7,9 +7,9 @@
 #include <cstdlib>
 #include <memory>
 
-#include "foodFinder.h"
-#include "foodAPI.h"
-#include "exporters.h"
+#include "include/finder.h"
+#include "include/foodAPI.h"
+#include "include/exporters.h"
 
 #include <grpcpp/grpcpp.h>
 #include <grpcpp/opencensus.h>

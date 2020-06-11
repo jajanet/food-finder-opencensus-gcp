@@ -24,7 +24,7 @@ cc_grpc_library(
 cc_library(
     name = "foodAPI",
     srcs = ["foodAPI.cc"],
-    hdrs = ["foodAPI.h"],
+    hdrs = ["include/foodAPI.h"],
     copts = DEFAULT_COPTS,
     deps = [
         ":food_cc_grpc",
@@ -44,8 +44,8 @@ cc_library(
 
 cc_library(
     name = "exporters",
-    srcs = ["exporters.cc"],
-    hdrs = ["exporters.h"],
+    srcs = ["include/exporters.cc"],
+    hdrs = ["include/exporters.h"],
     copts = DEFAULT_COPTS,
     deps = [
         "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
@@ -59,8 +59,8 @@ cc_library(
 
 
 cc_binary(
-    name = "foodFinder",
-    srcs = [ "foodFinder.cc", "foodFinder.h" ],
+    name = "finder",
+    srcs = [ "finder.cc", "include/finder.h" ],
     copts = DEFAULT_COPTS,
     deps = [
         ":foodAPI",
@@ -83,7 +83,7 @@ cc_binary(
 
 cc_binary(
     name = "foodVendor",
-    srcs = [ "foodVendor.cc", "foodVendor.h"],
+    srcs = [ "vendor.cc", "include/vendor.h"],
     copts = DEFAULT_COPTS,
     deps = [
         ":exporters",
@@ -104,7 +104,7 @@ cc_binary(
 
 cc_binary(
     name = "foodSupplier",
-    srcs = [ "foodSupplier.cc", "foodSupplier.h"],
+    srcs = [ "supplier.cc", "include/supplier.h"],
     copts = DEFAULT_COPTS,
     deps = [
         ":exporters",
@@ -123,43 +123,3 @@ cc_binary(
 )
 
 
-'''
-cc_library(
-    name = "foodVendor",
-    srcs = [ "foodVendor.cc" ],
-    hdrs = ["foodVendor.h"]
-)
-'''
-
-'''cc_binary(
-    name = "simulate.so",
-    srcs = [ "doDelay.cc" ],
-    linkshared=True
-)
-
-cc_binary(
-    name = "vendors.so",
-    srcs = [ "vendor_data.cc", "vendor_data.h" ],
-    linkshared=True
-)
-
-cc_import(
-  name = "vendorData",
-  shared_library = "vendors.so"
-)
-
-cc_import(
-  name = "simulate",
-  shared_library = "simulate.so"
-)
-cc_library(
-    name = "simulate",
-    srcs = [ "doDelay.cc" ],
-)
-
-cc_library(
-    name = "vendorData",
-    srcs = [ "vendor_data.cc", "vendor_data.h" ],
-)
-
-'''

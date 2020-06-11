@@ -6,8 +6,8 @@
 #include <vector>
 #include <map>
 
-#include "foodVendor.h"
-#include "exporters.h"
+#include "include/vendor.h"
+#include "include/exporters.h"
 #include "food.grpc.pb.h"
 #include "food.pb.h"
 #include <grpcpp/grpcpp.h>
