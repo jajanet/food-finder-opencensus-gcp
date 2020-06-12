@@ -11,6 +11,7 @@
 
 #include "include/supplier.h"
 #include "include/exporters.h"
+#include "include/simulatedProcessing.h"
 #include "food.grpc.pb.h"
 #include "food.pb.h"
 #include <grpcpp/grpcpp.h>
@@ -34,6 +35,11 @@ class SupplierService final : public food::Supplier::Service {
                     const food::ItemQuery* query,
                     food::StoreReply* reply) {
 
+    opencensus::trace::Span span = grpc::GetSpanFromServerContext(context);
+    span.AddAttribute("Supplier", "red");
+    span.AddAnnotation("Getting stores.");
+    doDelay();
+
     auto vendorInfo = getVendorOfferings();
 
     for (auto &vendorPair : vendorInfo) {
@@ -42,7 +48,7 @@ class SupplierService final : public food::Supplier::Service {
       }
     }
     std::cout << "Request for " << query->item() << "\n";
-    return grpc::Status::OK;
+    return randomlyFailedStatus;
   }
 };
 
@@ -81,10 +87,14 @@ int main(){
 }
 
 std::map<std::string, std::set<std::string>> vendorOfferings {
-{"Trader Joes", {"yeast", "flour", "sugar", "noodles", "chocolate", "salt"}},
-{"Target", {"yeast", "flour", "sugar", "noodles", "salt"}},
-{"Kroger", {"yeast", "flour", "noodles", "chocolate", "salt"}},
-{"Aldi", {"yeast", "flour", "sugar", "noodles", "chocolate", "salt"}}
+	{"Trader Joes",
+		{"yeast", "flour", "sugar", "noodles", "chocolate", "salt"}},
+	{"Target",
+		{"yeast", "flour", "sugar", "noodles", "salt"}},
+	{"Kroger",
+		{"yeast", "flour", "noodles", "chocolate", "salt"}},
+	{"Aldi",
+		{"yeast", "flour", "sugar", "noodles", "chocolate", "salt"}}
 };
 
 std::map<std::string, std::set<std::string>> getVendorOfferings() { return vendorOfferings; }

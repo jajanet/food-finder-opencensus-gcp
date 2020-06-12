@@ -57,13 +57,26 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "simulatedProcessing",
+    srcs = ["include/simulatedProcessing.cc"],
+    hdrs = ["include/simulatedProcessing.h"],
+    copts = DEFAULT_COPTS,
+    deps = [
+        "@com_google_absl//absl/time",
+        "@com_google_absl//absl/strings",
+        "@com_github_grpc_grpc//:grpc++",
+    ],
+)
+
 
 cc_binary(
     name = "finder",
     srcs = [ "finder.cc", "include/finder.h" ],
     copts = DEFAULT_COPTS,
     deps = [
-        ":foodAPI",
+        ":simulatedProcessing",
+	"foodAPI",
         ":exporters",
         ":food_cc_grpc",
         ":food_cc_proto",
@@ -86,6 +99,7 @@ cc_binary(
     srcs = [ "vendor.cc", "include/vendor.h"],
     copts = DEFAULT_COPTS,
     deps = [
+        ":simulatedProcessing",
         ":exporters",
         ":food_cc_grpc",
         ":food_cc_proto",
@@ -107,6 +121,7 @@ cc_binary(
     srcs = [ "supplier.cc", "include/supplier.h"],
     copts = DEFAULT_COPTS,
     deps = [
+        ":simulatedProcessing",
         ":exporters",
         ":food_cc_grpc",
         ":food_cc_proto",
