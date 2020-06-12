@@ -95,7 +95,7 @@ cc_binary(
 
 
 cc_binary(
-    name = "foodVendor",
+    name = "vendor",
     srcs = [ "vendor.cc", "include/vendor.h"],
     copts = DEFAULT_COPTS,
     deps = [
@@ -117,7 +117,7 @@ cc_binary(
 
 
 cc_binary(
-    name = "foodSupplier",
+    name = "supplier",
     srcs = [ "supplier.cc", "include/supplier.h"],
     copts = DEFAULT_COPTS,
     deps = [

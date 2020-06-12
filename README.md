@@ -2,21 +2,24 @@
 `bazel build :all`
 
 # To Run:
-FoodFinder Client
-`./bazel-bin/foodFinder`
-
 FoodSupplier Server
-`./bazel-bin/foodSupplier`
+
+`./bazel-bin/supplier`
 
 FoodVendor Server
-`./bazel-bin/foodVendor`
+
+`./bazel-bin/vendor`
+
+FoodFinder Client
+
+`./bazel-bin/finder`
 
 # Current Progress
 - Code implemented with the RPC standard (through gRPC), starter project spec baseline functionality, and a working bazel build
 
 # TODO
-- Add tracing with OpenCensus
-- Add synthetic deplays and other specified spec behavior
-- Deploy to GCP
-- Code cleanup with variables and file organization
+- Add more tracing and metrics tracking
+- Code cleanup with variables
 
+# Other
+Code based off of and has the same install prerequisites as https://github.com/census-instrumentation/opencensus-cpp/tree/master/examples/grpc
