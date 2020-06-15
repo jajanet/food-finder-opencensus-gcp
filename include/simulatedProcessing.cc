@@ -14,7 +14,7 @@ void doDelay() { // add delay from .1 to .6 sec
 
 
 grpc::Status randomlyFailedStatus() {
-  return rand() % 4 != 0?
+  return rand() % 6 != 0?
     grpc::Status::OK
     : grpc::Status(grpc::StatusCode::ABORTED, "Random fail");
 }
