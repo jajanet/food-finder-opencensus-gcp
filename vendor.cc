@@ -8,6 +8,7 @@
 
 #include "include/vendor.h"
 #include "include/exporters.h"
+#include "include/simulatedProcessing.h"
 #include "food.grpc.pb.h"
 #include "food.pb.h"
 #include <grpcpp/grpcpp.h>
@@ -26,24 +27,29 @@
 #include "opencensus/trace/trace_config.h"
 #include "prometheus/exposer.h"
 
+static opencensus::trace::AlwaysSampler sampler;
+
 class VendorService final : public food::Vendor::Service {
   grpc::Status GetItemInfo (grpc::ServerContext *context,
                     const food::ItemStoreQuery* query,
                     food::ItemInfoReply* reply) {
-
+  auto span = opencensus::trace::Span::StartSpan(
+		 "VendorService", nullptr, {&sampler});
   std::string store = query->store();
   std::string item = query->item();
 
-  std::cout << "Checking price and stock for " << item
-            << " at " << store << "\n";
-
-  auto stock = getVendorStock()[store][item];
-  auto price = getVendorPrices()[store][item];
+  int stock = getVendorStock()[store][item];
+  double price = getVendorPrices()[store][item];
 
   reply->set_price(price);
   reply->set_inventory(stock);
+  
+  doDelay();
+  span.AddAnnotation("Checking price and stock for " + item
+		  + " at " + store + "\n");
+  span.End();
 
-  return grpc::Status::OK;
+  return randomlyFailedStatus();
   }
 };
 

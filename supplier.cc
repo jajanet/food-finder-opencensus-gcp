@@ -47,8 +47,9 @@ class SupplierService final : public food::Supplier::Service {
         reply->add_stores(vendorPair.first);
       }
     }
+    
     std::cout << "Request for " << query->item() << "\n";
-    return randomlyFailedStatus;
+    return randomlyFailedStatus();
   }
 };
 

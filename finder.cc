@@ -31,20 +31,27 @@ void foodFinder() {
   std::vector<std::string> suppliers;
   SupplierAPI supplier;
   VendorAPI vendor;
+  static opencensus::trace::AlwaysSampler sampler;
   std:: cout << "\nWelcome to FoodFinder! Press Ctrl + C anytime you want "
              << "to quit this application. Enjoy!\n\n";
-
+  int count = 0;
   while(true) {
+    auto spanUserInput = opencensus::trace::Span::StartSpan(
+		        "Finder with user input " + std::to_string(count),
+			nullptr, {&sampler});
     std:: cout << "\n--------------------------------\n\n"
                << "What ingredient would you like to find? ";
     std::getline(std::cin, ingredient);
-    std::cout << "\nLooking nearby...\n";
-
+    auto spanFinder = opencensus::trace::Span::StartSpan(
+		        "Finder " + std::to_string(count),
+			&spanUserInput, {&sampler});
+    spanFinder.AddAnnotation("\nLooking nearby for " + ingredient + "...\n");
     if(supplier.isSupplied(ingredient, suppliers)) {
       vendor.getStockInfo(ingredient, suppliers);
       suppliers = {};
     }
-
+    spanUserInput.End();
+    spanFinder.End();
   }
 }
 
