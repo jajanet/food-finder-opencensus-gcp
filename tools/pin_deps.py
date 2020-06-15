@@ -56,7 +56,6 @@ PROJECTS = [
     GitHubProject('com_google_googletest', 'google', 'googletest'),
     GitHubProject('com_github_google_benchmark', 'google', 'benchmark'),
     GitHubProject('com_github_grpc_grpc', 'grpc', 'grpc'),
-    GitHubProject('com_github_jupp0r_prometheus_cpp', 'jupp0r', 'prometheus-cpp'),
     GitHubProject('com_github_curl', 'curl', 'curl'),
     GitHubProject('com_github_tencent_rapidjson', 'Tencent', 'rapidjson'),
     GitHubProject('com_google_googleapis', 'googleapis', 'googleapis'),

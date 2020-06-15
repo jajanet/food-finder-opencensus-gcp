@@ -27,14 +27,6 @@ def opencensus_cpp_deps():
         urls = ["https://github.com/grpc/grpc/archive/master.tar.gz"],
     )
 
-    # Prometheus client library - used by Prometheus exporter.
-    maybe(
-        http_archive,
-        name = "com_github_jupp0r_prometheus_cpp",
-        strip_prefix = "prometheus-cpp-master",
-        urls = ["https://github.com/jupp0r/prometheus-cpp/archive/master.zip"],
-    )
-
     # Curl library - used by zipkin exporter.
     maybe(
         http_archive,

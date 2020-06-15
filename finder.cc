@@ -61,10 +61,6 @@ int main() {
   RegisterExporters();
 
   foodFinder();
-      /*/ Disable tracing any further RPCs (which will be sent by exporters).
-  opencensus::trace::TraceConfig::SetCurrentTraceParams(
-      {128, 128, 128, 128, opencensus::trace::ProbabilitySampler(0.0)});
-  */
 }
 
 #endif // FOODFINDER

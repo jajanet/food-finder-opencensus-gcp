@@ -37,15 +37,6 @@ void RegisterExporters() {
         std::move(trace_opts));
   }
 
-  const char* ocagent_address = getenv("OCAGENT_ADDRESS");
-  if (ocagent_address == nullptr) {
-    std::cerr << "The OCAGENT_ADDRESS environment variable is not set: not "
-                 "exporting to OpenCensus Agent. (e.g. localhost:55678)\n";
-  } else {
-    opencensus::exporters::trace::OcAgentOptions opts;
-    opts.address = ocagent_address;
-    opencensus::exporters::trace::OcAgentExporter::Register(std::move(opts));
-  }
 }
 
 //#endif // EXPORTER

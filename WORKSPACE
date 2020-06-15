@@ -66,11 +66,6 @@ local_repository(
     path = "tools/zlib",
 )
 
-# Load Prometheus dependencies.
-load("@com_github_jupp0r_prometheus_cpp//bazel:repositories.bzl", "prometheus_cpp_repositories")
-
-prometheus_cpp_repositories()
-
 # Google APIs - used by Stackdriver exporter.
 load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
 

@@ -20,7 +20,6 @@
 #include "absl/strings/escaping.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
-#include "opencensus/exporters/stats/prometheus/prometheus_exporter.h"
 #include "opencensus/stats/stats.h"
 #include "opencensus/tags/context_util.h"
 #include "opencensus/tags/tag_map.h"
@@ -28,7 +27,6 @@
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_config.h"
-#include "prometheus/exposer.h"
 
 class SupplierService final : public food::Supplier::Service {
   grpc::Status GetStores (grpc::ServerContext *context,
@@ -63,14 +61,6 @@ void foodSupplier(){
   grpc::RegisterOpenCensusViewsForExport();
 
   RegisterExporters();
-
-  // Keep a shared pointer to the Prometheus exporter.
-  auto exporter =
-      std::make_shared<opencensus::exporters::stats::PrometheusExporter>();
-
-  // Expose a Prometheus endpoint.
-  prometheus::Exposer exposer("127.0.0.1:8080");
-  exposer.RegisterCollectable(exporter);
 
   grpc::ServerBuilder builder;
   SupplierService service;
