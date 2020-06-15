@@ -5,6 +5,7 @@
 
 grpc::Status randomlyFailedStatus();
 void doDelay();
+void doTimeout();
 bool isSuccess();
 
 #endif // SIMULATEDPROCESS_H

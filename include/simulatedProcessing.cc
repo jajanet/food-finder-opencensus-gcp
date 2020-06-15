@@ -8,7 +8,7 @@
 #include "absl/time/clock.h"
 
 void doTimeout() { // timeout
-  absl::sleepfor(absl::milliseconds(9999999));
+  absl::SleepFor(absl::Milliseconds(9999999));
 }
 
 
@@ -16,7 +16,7 @@ void doTimeout() { // timeout
 void doDelay() { // add delay from up to .5 sec
   int delay = rand() % 500;
   if (delay < 10) doTimeout();
-  absl::sleepfor(absl::milliseconds(delay));
+  absl::SleepFor(absl::Milliseconds(delay));
 }
 
 
