@@ -33,8 +33,7 @@ class VendorService final : public food::Vendor::Service {
   grpc::Status GetItemInfo (grpc::ServerContext *context,
                     const food::ItemStoreQuery* query,
                     food::ItemInfoReply* reply) {
-  auto span = opencensus::trace::Span::StartSpan(
-		 "VendorService", nullptr, {&sampler});
+  auto span = grpc::GetSpanFromServerContext(context);
   std::string store = query->store();
   std::string item = query->item();
 

@@ -23,6 +23,8 @@
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/trace_config.h"
 
+static opencensus::trace::AlwaysSampler sampler;
+
 SupplierAPI::SupplierAPI() {
   // Create channels to send RPCs over to supplier server
   supplierStub = food::Supplier::NewStub(
@@ -35,6 +37,11 @@ bool SupplierAPI::isSupplied(const std::string &ingredient, std::vector<std::str
   food::ItemQuery query;
   food::StoreReply reply;
 
+  auto span = opencensus::trace::Span::StartSpan(
+		 "SupplierCall", nullptr, {&sampler});
+  
+  span.AddAnnotation("Calling supplier service for " + ingredient + "\n");
+  
   // Set the search query
   query.set_item(ingredient);
 
@@ -55,6 +62,7 @@ bool SupplierAPI::isSupplied(const std::string &ingredient, std::vector<std::str
       }
     }
   }
+  span.End();
 
   return suppliers.size() > 0;
 }
@@ -68,6 +76,11 @@ VendorAPI::VendorAPI() {
 }
 
 void VendorAPI::getStockInfo(const std::string &ingredient, const std::vector<std::string> &suppliers){
+  auto span = opencensus::trace::Span::StartSpan(
+		 "VendorCall", nullptr, {&sampler});
+  
+  span.AddAnnotation("Calling vendor service for " + ingredient + "\n");
+  
   food::ItemStoreQuery query;
 
   query.set_item(ingredient);
@@ -89,6 +102,8 @@ void VendorAPI::getStockInfo(const std::string &ingredient, const std::vector<st
     std::cout << store << " has " << reply.inventory() << " in stock for $"
               << reply.price() << " each\n";
   }
+
+  span.End();
 }
 
 
