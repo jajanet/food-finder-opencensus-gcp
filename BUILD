@@ -20,7 +20,6 @@ cc_grpc_library(
 )
 
 
-
 cc_library(
     name = "foodAPI",
     srcs = ["foodAPI.cc"],
@@ -50,11 +49,30 @@ cc_library(
     deps = [
         "//opencensus/exporters/stats/stackdriver:stackdriver_exporter",
         "//opencensus/exporters/stats/stdout:stdout_exporter",
-        "//opencensus/exporters/trace/ocagent:ocagent_exporter",
         "//opencensus/exporters/trace/stackdriver:stackdriver_exporter",
         "//opencensus/exporters/trace/stdout:stdout_exporter",
         "@com_google_absl//absl/strings",
     ],
+)
+
+cc_library(
+    name = "metrics",
+    srcs = ["include/metrics.cc"],
+    hdrs = ["include/metrics.h"],
+    copts = DEFAULT_COPTS,
+    deps = [
+        "@com_google_absl//absl/time",
+        "@com_google_absl//absl/strings",
+        "@com_github_grpc_grpc//:grpc++",
+	"//opencensus/stats",
+        "//opencensus/tags",
+        "//opencensus/tags:context_util",
+        "//opencensus/tags:with_tag_map",
+        "//opencensus/trace",
+        "//opencensus/trace:context_util",
+        "//opencensus/trace:with_span",
+        "@com_github_grpc_grpc//:grpc_opencensus_plugin",
+    ]
 )
 
 cc_library(
@@ -63,6 +81,7 @@ cc_library(
     hdrs = ["include/simulatedProcessing.h"],
     copts = DEFAULT_COPTS,
     deps = [
+        "//opencensus/trace",
         "@com_google_absl//absl/time",
         "@com_google_absl//absl/strings",
         "@com_github_grpc_grpc//:grpc++",
@@ -78,6 +97,7 @@ cc_binary(
         ":simulatedProcessing",
 	"foodAPI",
         ":exporters",
+        ":metrics",
         ":food_cc_grpc",
         ":food_cc_proto",
         "//opencensus/tags",
@@ -101,6 +121,7 @@ cc_binary(
     deps = [
         ":simulatedProcessing",
         ":exporters",
+        ":metrics",
         ":food_cc_grpc",
         ":food_cc_proto",
         "//opencensus/tags",
@@ -121,6 +142,7 @@ cc_binary(
     deps = [
         ":simulatedProcessing",
         ":exporters",
+        ":metrics",
         ":food_cc_grpc",
         ":food_cc_proto",
         "//opencensus/tags",
