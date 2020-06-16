@@ -37,21 +37,23 @@ void foodFinder() {
   int count = 0;
   while(true) {
     auto spanUserInput = opencensus::trace::Span::StartSpan(
-		        "Finder with user input " + std::to_string(count),
+		        "Finder Loop #" + std::to_string(count) + " (w/ input)",
 			nullptr, {&sampler});
     std:: cout << "\n--------------------------------\n\n"
                << "What ingredient would you like to find? ";
     std::getline(std::cin, ingredient);
     auto spanFinder = opencensus::trace::Span::StartSpan(
-		        "Finder " + std::to_string(count),
+		        "Finder Loop #" + std::to_string(count),
 			&spanUserInput, {&sampler});
     spanFinder.AddAnnotation("\nLooking nearby for " + ingredient + "...\n");
-    if(supplier.isSupplied(ingredient, suppliers)) {
-      vendor.getStockInfo(ingredient, suppliers);
+    if(supplier.isSupplied(ingredient, suppliers, &spanFinder)) {
+      vendor.getStockInfo(ingredient, suppliers, &spanFinder);
       suppliers = {};
     }
     spanUserInput.End();
     spanFinder.End();
+
+    count++;
   }
 }
 

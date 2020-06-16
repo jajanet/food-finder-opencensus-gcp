@@ -6,11 +6,13 @@
 
 #include "food.grpc.pb.h"
 #include "food.pb.h"
+#include "opencensus/trace/span.h"
 
 class SupplierAPI {
   public:
     SupplierAPI();
-    bool isSupplied(const std::string &ingredient, std::vector<std::string> &suppliers);
+    bool isSupplied(const std::string &ingredient,
+		    std::vector<std::string> &suppliers, opencensus::trace::Span *parent);
 
   private:
     std::unique_ptr<food::Supplier::Stub> supplierStub;
@@ -20,7 +22,8 @@ class SupplierAPI {
 class VendorAPI {
   public:
     VendorAPI();
-    void getStockInfo(const std::string &ingredient, const std::vector<std::string> &suppliers);
+    void getStockInfo(const std::string &ingredient,
+		    const std::vector<std::string> &suppliers, opencensus::trace::Span *parent);
 
   private:
     std::unique_ptr<food::Vendor::Stub> vendorStub;

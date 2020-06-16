@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "include/supplier.h"
+#include "include/metrics.h"
 #include "include/exporters.h"
 #include "include/simulatedProcessing.h"
 #include "food.grpc.pb.h"
@@ -31,12 +32,15 @@
 class SupplierService final : public food::Supplier::Service {
   grpc::Status GetStores (grpc::ServerContext *context,
                     const food::ItemQuery* query,
-                    food::StoreReply* reply) {
+                    food::StoreReply* reply) override {
 
-    opencensus::trace::Span span = grpc::GetSpanFromServerContext(context);
+    // for latency metrics
+    absl::Time start = absl::Now();
+
+    auto span = grpc::GetSpanFromServerContext(context);
     span.AddAttribute("Supplier", "red");
-    span.AddAnnotation("Getting stores.");
-    doDelay();
+    span.AddAnnotation("Getting stores");
+    doDelay(&span);
 
     auto vendorInfo = getVendorOfferings();
 
@@ -46,7 +50,13 @@ class SupplierService final : public food::Supplier::Service {
       }
     }
     
-    std::cout << "Request for " << query->item() << "\n";
+    span.AddAnnotation("Request for " + query->item());
+    std::cout << "Testing: " << span.context().ToString() << "\n";
+    absl::Time end = absl::Now();
+    double latency_ms = absl::ToDoubleMilliseconds(end - start);
+
+    opencensus::stats::Record({{LatencyMsMeasure(), latency_ms}},
+	                            {{LatencyMethodKey(), "name"}});
     return randomlyFailedStatus();
   }
 };
@@ -54,7 +64,8 @@ class SupplierService final : public food::Supplier::Service {
 void foodSupplier(){
   const std::string port = "127.0.0.1:8888";
 
-  // Register the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
+  // Register:w
+  // the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
   grpc::RegisterOpenCensusPlugin();
 
   // Register the gRPC views (latency, error count, etc).

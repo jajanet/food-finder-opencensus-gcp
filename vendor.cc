@@ -25,12 +25,10 @@
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_config.h"
 
-static opencensus::trace::AlwaysSampler sampler;
-
 class VendorService final : public food::Vendor::Service {
   grpc::Status GetItemInfo (grpc::ServerContext *context,
                     const food::ItemStoreQuery* query,
-                    food::ItemInfoReply* reply) {
+                    food::ItemInfoReply* reply) override {
   auto span = grpc::GetSpanFromServerContext(context);
   std::string store = query->store();
   std::string item = query->item();
@@ -41,10 +39,10 @@ class VendorService final : public food::Vendor::Service {
   reply->set_price(price);
   reply->set_inventory(stock);
   
-  doDelay();
+  doDelay(&span);
   span.AddAnnotation("Checking price and stock for " + item
 		  + " at " + store + "\n");
-  span.End();
+  //span.End();
 
   return randomlyFailedStatus();
   }

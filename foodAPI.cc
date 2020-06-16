@@ -23,8 +23,6 @@
 #include "opencensus/trace/sampler.h"
 #include "opencensus/trace/trace_config.h"
 
-static opencensus::trace::AlwaysSampler sampler;
-
 SupplierAPI::SupplierAPI() {
   // Create channels to send RPCs over to supplier server
   supplierStub = food::Supplier::NewStub(
@@ -32,14 +30,13 @@ SupplierAPI::SupplierAPI() {
                           grpc::InsecureChannelCredentials()));
 }
 
-bool SupplierAPI::isSupplied(const std::string &ingredient, std::vector<std::string> &suppliers){
+bool SupplierAPI::isSupplied(const std::string &ingredient,
+	std::vector<std::string> &suppliers, opencensus::trace::Span *parent){
   grpc::ClientContext ctx;
   food::ItemQuery query;
   food::StoreReply reply;
 
-  auto span = opencensus::trace::Span::StartSpan(
-		 "SupplierCall", nullptr, {&sampler});
-  
+  auto span = opencensus::trace::Span::StartSpan("SupplierCall", parent); 
   span.AddAnnotation("Calling supplier service for " + ingredient + "\n");
   
   // Set the search query
@@ -50,15 +47,18 @@ bool SupplierAPI::isSupplied(const std::string &ingredient, std::vector<std::str
   if (!status.ok()) {
     std::cout << "Error " << status.error_code() << ": \""
               << status.error_message() << "\"\n";
+    opencensus::trace::GetCurrentSpan().SetStatus(
+		    opencensus::trace::StatusCode::UNKNOWN, status.error_message());
+    opencensus::trace::GetCurrentSpan().End();
   }
   else {
-    if (reply.stores_size() == 0) std::cout << "No matches near you :(\n";
+    span.AddAnnotation("Found " + std::to_string(reply.stores_size()) + " vendors:\n");
+    if (reply.stores_size() == 0) span.AddAnnotation("No matches\n");
     // Add all stores from the RPC reply
     else {
-      std::cout << "Found " << ingredient << " at the following stores:\n";
       for (auto &store : reply.stores()) {
         suppliers.push_back(store);
-        std::cout << store << "\n";
+        span.AddAnnotation(store);
       }
     }
   }
@@ -68,24 +68,19 @@ bool SupplierAPI::isSupplied(const std::string &ingredient, std::vector<std::str
 }
 
 
-
 VendorAPI::VendorAPI() {
   vendorStub = food::Vendor::NewStub(
       grpc::CreateChannel("127.0.0.1:8889",
                           grpc::InsecureChannelCredentials()));
 }
 
-void VendorAPI::getStockInfo(const std::string &ingredient, const std::vector<std::string> &suppliers){
-  auto span = opencensus::trace::Span::StartSpan(
-		 "VendorCall", nullptr, {&sampler});
-  
-  span.AddAnnotation("Calling vendor service for " + ingredient + "\n");
+void VendorAPI::getStockInfo(const std::string &ingredient,
+		const std::vector<std::string> &suppliers, opencensus::trace::Span *parent){
+  auto span = opencensus::trace::Span::StartSpan("VendorCall", parent);
+  span.AddAnnotation("Calling vendor service for " + ingredient);
   
   food::ItemStoreQuery query;
-
   query.set_item(ingredient);
-
-  std::cout << "\nGetting " << ingredient << " info from relevant stores...\n\n";
 
   // Send the RPC for each store.
   for (auto &store : suppliers) {
@@ -96,13 +91,14 @@ void VendorAPI::getStockInfo(const std::string &ingredient, const std::vector<st
     if (!status.ok()) {
       std::cout << "Error " << status.error_code() << ": \""
                 << status.error_message() << "\"\n";
-      return;
+      opencensus::trace::GetCurrentSpan().SetStatus(
+		      opencensus::trace::StatusCode::UNKNOWN, status.error_message());
+      opencensus::trace::GetCurrentSpan().End();
     }
-    // Print out info from stores from each RPC reply
-    std::cout << store << " has " << reply.inventory() << " in stock for $"
-              << reply.price() << " each\n";
+    else // Print out info from stores from each RPC reply
+      span.AddAnnotation(store + " - " + std::to_string(reply.inventory()) + " items for $"
+              + std::to_string(reply.price()) + " each");
   }
-
   span.End();
 }
 
