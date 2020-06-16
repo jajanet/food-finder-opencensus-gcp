@@ -6,17 +6,24 @@
 #include <grpcpp/grpcpp.h>
 #include "absl/time/time.h"
 #include "absl/time/clock.h"
+#include "opencensus/trace/span.h"
 
-void doTimeout() { // timeout
+void doTimeout(opencensus::trace::Span *parent) {
+  auto span = opencensus::trace::Span::StartSpan("timeout", parent);
   absl::SleepFor(absl::Milliseconds(9999999));
 }
 
 
-
-void doDelay() { // add delay from up to .5 sec
-  int delay = rand() % 500;
-  if (delay < 10) doTimeout();
+void doDelay(opencensus::trace::Span *parent) { // add delay from up to .2 sec
+  auto span = opencensus::trace::Span::StartSpan("fake_work", parent);
+  
+  int delay = rand() % 150;
+  span.AddAnnotation("Delaying by " + std::to_string(delay) + " ms");
   absl::SleepFor(absl::Milliseconds(delay));
+  
+  if (delay < 3) doTimeout(&span);
+  
+  span.End();
 }
 
 
