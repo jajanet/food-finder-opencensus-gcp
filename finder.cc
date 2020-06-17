@@ -26,30 +26,36 @@
 
 
 void foodFinder() {
-  // The client Span ends when ctx falls out of scope.
+  static opencensus::trace::AlwaysSampler sampler;
   std::string ingredient = "";
   std::vector<std::string> suppliers;
+
+  // Initialize API classes to create channels to connect to
   SupplierAPI supplier;
   VendorAPI vendor;
-  static opencensus::trace::AlwaysSampler sampler;
-  std:: cout << "\nWelcome to FoodFinder! Press Ctrl + C anytime you want "
-             << "to quit this application. Enjoy!\n\n";
-  int count = 0;
-  while(true) {
+  
+  std:: cout << "\nWelcome to FoodFinder! Press Ctrl + C anytime you want to "
+             << "quit. Valid ingredients are found in ./README.md. Enjoy!\n\n";
+
+  int count = 0; // Use count to track spans
+  while (true) {
     auto spanUserInput = opencensus::trace::Span::StartSpan(
-		        "Finder Loop #" + std::to_string(count) + " (w/ input)",
-			nullptr, {&sampler});
-    std:: cout << "\n--------------------------------\n\n"
-               << "What ingredient would you like to find? ";
+		        "Finder Loop #" + std::to_string(count) + " (input)",
+			nullptr, {&sampler}); // Span to time user input too
+
     std::getline(std::cin, ingredient);
+
     auto spanFinder = opencensus::trace::Span::StartSpan(
 		        "Finder Loop #" + std::to_string(count),
 			&spanUserInput, {&sampler});
     spanFinder.AddAnnotation("\nLooking nearby for " + ingredient + "...\n");
-    if(supplier.isSupplied(ingredient, suppliers, &spanFinder)) {
+
+    // Only call vendor is the inputted ingredient is supplied
+    if (supplier.isSupplied(ingredient, suppliers, &spanFinder)) {
       vendor.getStockInfo(ingredient, suppliers, &spanFinder);
       suppliers = {};
     }
+
     spanUserInput.End();
     spanFinder.End();
 
