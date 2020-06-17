@@ -29,27 +29,31 @@
 #include "opencensus/trace/span.h"
 #include "opencensus/trace/trace_config.h"
 
+
 class SupplierService final : public food::Supplier::Service {
-  grpc::Status GetStores (grpc::ServerContext *context,
+  // Return stores with an ingredient
+  grpc::Status GetStores(grpc::ServerContext *context,
                     const food::ItemQuery* query,
                     food::StoreReply* reply) override {
 
-    // for latency metrics
+    // Track to create latency metrics
     absl::Time start = absl::Now();
 
+    // Add to existing span given by the context the client sent
     auto span = grpc::GetSpanFromServerContext(context);
     span.AddAttribute("Supplier", "red");
     span.AddAnnotation("Getting stores");
     doDelay(&span);
 
-    auto vendorInfo = getVendorOfferings();
+    auto vendorInfo = getVendorOfferings(); // Metadata
 
+    // Find relevant stores and add to the reply as neccessary
     for (auto &vendorPair : vendorInfo) {
       if (vendorPair.second.find(query->item()) != vendorPair.second.end()) {
         reply->add_stores(vendorPair.first);
       }
     }
-    
+
     span.AddAnnotation("Request for " + query->item());
     std::cout << "Testing: " << span.context().ToString() << "\n";
     absl::Time end = absl::Now();
@@ -61,30 +65,29 @@ class SupplierService final : public food::Supplier::Service {
   }
 };
 
-void foodSupplier(){
+void foodSupplier() {
   const std::string port = "127.0.0.1:8888";
 
-  // Register:w
-  // the OpenCensus gRPC plugin to enable stats and tracing in gRPC.
+  // Register OpenCensus gRPC plugin to enable stats and tracing in gRPC.
   grpc::RegisterOpenCensusPlugin();
 
   // Register the gRPC views (latency, error count, etc).
   grpc::RegisterOpenCensusViewsForExport();
 
   RegisterExporters();
+  RegisterLatencyView();
 
-  grpc::ServerBuilder builder;
   SupplierService service;
+  grpc::ServerBuilder builder;
 
   builder.AddListeningPort(port, grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
   std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
   std::cout << "Server listening on [::]:" << port << "\n";
   server->Wait();
-
 }
 
-int main(){
+int main() {
   foodSupplier();
 }
 
