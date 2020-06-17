@@ -34,5 +34,6 @@ void RegisterLatencyView();
 void RegisterTrafficView();
 void RegisterErrorsView();
 void RegisterSaturationView(); 
+void RegisterViews();
 
 #endif // METRICS_H

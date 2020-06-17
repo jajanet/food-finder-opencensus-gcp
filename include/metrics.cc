@@ -26,6 +26,8 @@ ABSL_CONST_INIT const absl::string_view kTraffic = "custom/traffic"; // rpc call
 ABSL_CONST_INIT const absl::string_view kErrors = "custom/errors";
 ABSL_CONST_INIT const absl::string_view kSaturation = "custom/saturation";
 
+
+// Custom measures
 opencensus::stats::MeasureDouble LatencyMsMeasure() {
   static const auto measure = opencensus::stats::MeasureDouble::Register(
 	        kLatency, "Latency (milliseconds)", "ms");
@@ -48,6 +50,7 @@ opencensus::stats::MeasureDouble SaturationMeasure() {
 }
 
 
+// Custom keys
 opencensus::tags::TagKey LatencyMethodKey() {
   return opencensus::tags::TagKey::Register("latency");
 }
@@ -64,16 +67,17 @@ opencensus::tags::TagKey SaturationMethodKey() {
   return opencensus::tags::TagKey::Register("saturation");
 }
 
+
+// Register custom views for exporting
 void RegisterLatencyView() {
-  LatencyMsMeasure();
+  LatencyMsMeasure(); // Initialize custom measure
   opencensus::stats::ViewDescriptor()
     .set_name("food/latency")
     .set_description("The various methods' latencies in milliseconds")
     .set_measure(kLatency)
     .set_aggregation(opencensus::stats::Aggregation::Distribution(
         opencensus::stats::BucketBoundaries::Explicit(
-                {0, 25, 50, 75, 100, 200, 400, 600,
-			800, 1000, 2000, 4000, 6000})))
+                {0, 25, 50, 75, 100, 200, 400, 600, 800, 1000})))
     .add_column(LatencyMethodKey())
     .RegisterForExport();
 }
@@ -84,9 +88,7 @@ void RegisterTrafficView() {
     .set_name("foodfinder/traffic")
     .set_description("Number of calls made so far")
     .set_measure(kTraffic)
-    .set_aggregation(opencensus::stats::Aggregation::Distribution(
-        opencensus::stats::BucketBoundaries::Explicit(
-                {0, 25, 50, 75, 100, 200, 400, 600, 800, 1000})))
+    .set_aggregation(opencensus::stats::Aggregation::Sum())
     .add_column(TrafficMethodKey())
     .RegisterForExport();
 }
@@ -97,9 +99,7 @@ void RegisterErrorsView() {
     .set_name("foodfinder/errors")
     .set_description("Errors thrown so far")
     .set_measure(kErrors)
-    .set_aggregation(opencensus::stats::Aggregation::Distribution(
-        opencensus::stats::BucketBoundaries::Explicit(
-                {0, 25, 50, 75, 100, 200, 400, 600, 800, 1000})))
+    .set_aggregation(opencensus::stats::Aggregation::Sum())
     .add_column(ErrorsMethodKey())
     .RegisterForExport();
 }
@@ -117,14 +117,13 @@ void RegisterSaturationView() {
     .RegisterForExport();
 }
 
-/*
-  absl::Time start = absl::Now();
-  absl::Time end = absl::Now();
-  double latency_ms = absl::ToDoubleMilliseconds(end - start);
 
-  opencensus::stats::Record({{LatencyMsMeasure(), latency_ms}},
-	                            {{LatencyMethodKey(), "name"}});
+void RegisterViews() {
+  RegisterLatencyView();
+  RegisterTrafficView();
+  RegisterErrorsView();
+  RegisterSaturationView();
+}
 
-*/ // this is for actually recording latency
 
 #endif // METRICS
