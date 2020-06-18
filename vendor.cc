@@ -29,7 +29,11 @@ class VendorService final : public food::Vendor::Service {
   grpc::Status GetItemInfo (grpc::ServerContext *context,
                     const food::ItemStoreQuery* query,
                     food::ItemInfoReply* reply) override {
-  auto span = grpc::GetSpanFromServerContext(context);
+  // Set server timeout to 2 seconds
+  context.set_deadline(std::chrono::system_clock::now() +
+      std::chrono::milliseconds(2000));
+  
+auto span = grpc::GetSpanFromServerContext(context);
   std::string store = query->store();
   std::string item = query->item();
 
@@ -42,7 +46,6 @@ class VendorService final : public food::Vendor::Service {
   doDelay(&span);
   span.AddAnnotation("Checking price and stock for " + item
 		  + " at " + store + "\n");
-  //span.End();
 
   return randomlyFailedStatus();
   }

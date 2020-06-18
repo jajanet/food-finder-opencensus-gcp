@@ -37,7 +37,7 @@ void foodFinder() {
   std:: cout << "\nWelcome to FoodFinder! Press Ctrl + C anytime you want to "
              << "quit. Valid ingredients are found in ./README.md. Enjoy!\n\n";
 
-  int count = 0; // Use count to track spans
+  int count = 0; // Use count variable to track individual cycles
   while (true) {
     auto spanUserInput = opencensus::trace::Span::StartSpan(
 		        "Finder Loop #" + std::to_string(count) + " (input)",
@@ -50,7 +50,7 @@ void foodFinder() {
 			&spanUserInput, {&sampler});
     spanFinder.AddAnnotation("\nLooking nearby for " + ingredient + "...\n");
 
-    // Only call vendor is the inputted ingredient is supplied
+    // Only call vendor if the inputted ingredient is supplied
     if (supplier.isSupplied(ingredient, suppliers, &spanFinder)) {
       vendor.getStockInfo(ingredient, suppliers, &spanFinder);
       suppliers = {};
