@@ -29,9 +29,6 @@ class VendorService final : public food::Vendor::Service {
   grpc::Status GetItemInfo (grpc::ServerContext *context,
                     const food::ItemStoreQuery* query,
                     food::ItemInfoReply* reply) override {
-  // Set server timeout to 2 seconds
-  context.set_deadline(std::chrono::system_clock::now() +
-      std::chrono::milliseconds(2000));
   
 auto span = grpc::GetSpanFromServerContext(context);
   std::string store = query->store();

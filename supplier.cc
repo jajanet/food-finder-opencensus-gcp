@@ -36,10 +36,6 @@ class SupplierService final : public food::Supplier::Service {
                     const food::ItemQuery* query,
                     food::StoreReply* reply) override {
 
-    // Set server timeout to 2 seconds
-    context.set_deadline(std::chrono::system_clock::now() +
-        std::chrono::milliseconds(2000));
-
     // Track to create latency metrics
     absl::Time start = absl::Now();
 

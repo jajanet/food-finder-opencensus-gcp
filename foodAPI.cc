@@ -41,6 +41,10 @@ bool SupplierAPI::isSupplied(const std::string &ingredient,
   // Create and set the search query
   food::ItemQuery query;
   query.set_item(ingredient);
+  // Set server timeout to 2 seconds
+  ctx.set_deadline(std::chrono::system_clock::now() +
+      std::chrono::milliseconds(2000));
+
 
   // Span used for tracing
   auto span = opencensus::trace::Span::StartSpan("SupplierCall", parent);
@@ -89,8 +93,12 @@ void VendorAPI::getStockInfo(const std::string &ingredient,
   // Send the RPC for each store.
   for (auto &store : suppliers) {
     query.set_store(store);
-    grpc::ClientContext ctx;
     food::ItemInfoReply reply;
+    grpc::ClientContext ctx;
+
+    // Set server timeout to 2 seconds
+    ctx.set_deadline(std::chrono::system_clock::now() +
+        std::chrono::milliseconds(2000));
 
     grpc::Status status = vendorStub->GetItemInfo(&ctx, query, &reply);
     if (!status.ok()) {
